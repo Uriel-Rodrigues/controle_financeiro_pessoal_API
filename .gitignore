@@ -1,0 +1,29 @@
+#Node.js dependencias
+node_modules/
+#diretorio com compilados
+dist/
+#typeScript
+*.tsbuildinfo
+#logs
+logs/
+*.logsnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+#enviroment variables
+.env
+.env.local
+.env.*.local
+#editor-specific files
+#.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_store
+Thumbs.db
+
+#OS-specific files
+.DS_store*.lock
+#other
+coverage/
+tmp/
