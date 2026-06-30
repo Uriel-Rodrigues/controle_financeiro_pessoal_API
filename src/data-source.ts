@@ -1,6 +1,11 @@
 import "reflect-metadata"
+import dotenv from "dotenv"
 import { DataSource } from "typeorm"
+//carregar as variaveis do arquivo .env
+dotenv.config()
 
+//?? operador de coalescência nula - 
+// se o valor da esquerda for nulo sera usado o da direita 
 const type = process.env.DB_TYPE ?? "mysql"
 
 export const AppDataSource = new DataSource({
@@ -14,5 +19,5 @@ export const AppDataSource = new DataSource({
     logging: true,
     entities: [],
     subscribers: [],
-    migrations: [],
+    migrations: [__dirname + "/migration/*.js"],
 })
