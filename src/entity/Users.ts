@@ -2,9 +2,9 @@ import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToMany
 //importa a entidade Transactions
 import { Transaction } from "./Transactions"
 //importa a entidade Category
-import { Category } from "./Category"
+import { Category } from "./Categories"
 
-import { FinancialGoals } from "./Financial_goals"
+import { FinancialGoals } from "./FinancialGoals"
 
 @Entity("users")
 export class User {

@@ -2,7 +2,7 @@ import {Entity ,PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne } from "ty
 //importa a entidade Users para ser usada no relacionamento 
 import { User } from "./Users"
 //importa a entidade category para ser usada no relacionamento 
-import { Category } from "./Category"
+import { Category } from "./Categories"
 
 export enum UserType{
     INCOME = "income",
@@ -26,6 +26,7 @@ export class Transaction {
     @Column({type: "varchar", length: 255})
     observations!: string
 
+
     // relacionamento ManyToOne com a tabela Users
     // Transactions 3----- usuario 
     @ManyToOne(() => User, (user) => user.transactions)
@@ -35,7 +36,6 @@ export class Transaction {
     // Transactions 3----- category 
     @ManyToOne(() => Category, (category) => category.transactions)
     categories!: Category
-
 
     
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})

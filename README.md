@@ -107,3 +107,14 @@ criar aquivo .env na rais do projeto
 ```
 npm install --save-dev @types/dotenv
 ```
+*14 - Criar a migrations que será usada para criar a tebale no banco de dados* 
+```
+npx typeorm migration:create src/migration/<nome-da-migration>
+```
+```
+npx typeorm migration:create src/migration/CreateSituationsTable
+```
+*15 - Executar as migration para criar as tabelas no banco de dados*
+```
+npx typeorm migration:run -d dist/data-source.js
+```
