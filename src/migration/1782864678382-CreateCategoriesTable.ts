@@ -16,13 +16,18 @@ export class CreateCategoriesTable1782864678382 implements MigrationInterface {
                 },
                 {
                     name: "name",
-                    type: "varchar"
+                    type: "varchar",
+                    isUnique: true
                 },
                 {
                     name: "type",
                     type: "enum",
                     enum:["income", "expense"],
                     isNullable: false
+                },
+                {
+                    name: "usersId",
+                    type: "int"
                 },
                 {
                     name: "created_at",
@@ -40,7 +45,7 @@ export class CreateCategoriesTable1782864678382 implements MigrationInterface {
         await queryRunner.createForeignKey(
             "categories",
             new TableForeignKey({
-                columnNames: ["users_id"],
+                columnNames: ["usersId"],
                 referencedTableName: "users",
                 referencedColumnNames: ["id"],
                 onDelete: "CASCADE"
@@ -51,7 +56,7 @@ export class CreateCategoriesTable1782864678382 implements MigrationInterface {
     public async down(queryRunner: QueryRunner): Promise<void> {
         //deletar a chave estrangeira
         const table = await queryRunner.getTable("categories")
-        const foreignKey = table?.foreignKeys.find((fk) => fk.columnNames.includes("users_id"))
+        const foreignKey = table?.foreignKeys.find((fk) => fk.columnNames.includes("usersId"))
         if(foreignKey){
             await queryRunner.dropForeignKey("categories", foreignKey)
         }

@@ -11,7 +11,7 @@ export class User {
     @PrimaryGeneratedColumn()
     id!:number
 
-    @Column()
+    @Column({type: "varchar", length: 150, unique:true})
     name!: string
 
     @Column({unique: true})
@@ -20,7 +20,7 @@ export class User {
     @Column()
     password!: string
 
-    @Column()
+    @Column({unique:true})
     recoverPassword!: string
 
     

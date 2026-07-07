@@ -14,6 +14,10 @@ export class CreateUsersTable1782846416868 implements MigrationInterface {
                     generationStrategy: "increment"
                 },
                 {
+                    name: "name",
+                    type: "varchar"
+                },
+                {
                     name: "email",
                     type: "varchar",
                     isUnique: true,
@@ -25,7 +29,9 @@ export class CreateUsersTable1782846416868 implements MigrationInterface {
                 },
                 {
                     name: "recoverPassword",
-                    type: "varchar" 
+                    type: "varchar",
+                    isUnique: true, 
+                    isNullable: true
                 },
                 {
                     name: "created_at",

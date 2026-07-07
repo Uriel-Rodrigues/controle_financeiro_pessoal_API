@@ -9,11 +9,18 @@ dotenv.config()
 //criar aplicação Express
 const app = express()
 
+//criar o middleware para receber os dados no corpo da requisição
+app.use(express.json())
+
 // importas as controllers
-import login from "./controllers/login"
+import usersController from "./controllers/usersController"
+import transactionsController from "./controllers/transactionsController"
+import categoriesController from "./controllers/categoriesController"
 
 //criar rotas
-app.use('/', login)
+app.use('/', usersController)
+app.use('/', transactionsController)
+app.use('/', categoriesController)
 
 //criar rota get principal
 app.get("/", (req: Request, res: Response) => {

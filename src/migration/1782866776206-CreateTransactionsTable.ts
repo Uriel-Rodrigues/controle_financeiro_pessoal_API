@@ -21,7 +21,7 @@ export class CreateTransactionsTable1782866776206 implements MigrationInterface 
                 },
                 {
                     name: "description",
-                    type: "varchar"
+                    type: "varchar",
                 },
                 {
                     name: "amount",
@@ -37,7 +37,17 @@ export class CreateTransactionsTable1782866776206 implements MigrationInterface 
                 },
                 {
                     name: "observations",
-                    type: "varchar"
+                    type: "varchar",
+                    isNullable: true
+                },
+                {
+                    name: "usersId",
+                    type: "int"
+
+                },
+                {
+                    name: "categoriesId",
+                    type: "int"
                 },
                 {
                     name: "created_at",
@@ -56,7 +66,7 @@ export class CreateTransactionsTable1782866776206 implements MigrationInterface 
             "transactions",
             new TableForeignKey({
                 name: "fk_transactions_users",
-                columnNames: ["users_id"],
+                columnNames: ["usersId"],
                 referencedTableName: "users",
                 referencedColumnNames: ["id"],
                 onDelete: "CASCADE"
@@ -68,7 +78,7 @@ export class CreateTransactionsTable1782866776206 implements MigrationInterface 
             "transactions",
             new TableForeignKey({
                 name:"fk_transactions_categories",
-                columnNames: ["categories_id"],
+                columnNames: ["categoriesId"],
                 referencedTableName: "categories",
                 referencedColumnNames: ["id"],
                 onDelete: "CASCADE"
@@ -78,13 +88,13 @@ export class CreateTransactionsTable1782866776206 implements MigrationInterface 
 
     public async down(queryRunner: QueryRunner): Promise<void> {
     //detelar a chave estrangeira com a tabela users
-    await queryRunner.dropForeignKey("transctions", "fk_transactions_users" )
+    await queryRunner.dropForeignKey("transactions", "fk_transactions_users" )
     
     //detelar a chave estrangeira com a tabela categories
-    await queryRunner.dropForeignKey("transctions", "fk_transactions_categories",)
+    await queryRunner.dropForeignKey("transactions", "fk_transactions_categories",)
 
     //deletar a tabela criada
-    await queryRunner.dropTable("categories")
+    await queryRunner.dropTable("transactions")
     }
 
 }

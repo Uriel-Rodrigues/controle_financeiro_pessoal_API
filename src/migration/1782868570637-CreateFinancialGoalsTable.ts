@@ -47,6 +47,10 @@ export class CreateFinancialGoalsTable1782868570637 implements MigrationInterfac
                     isNullable: false
                 },
                 {
+                    name: "usersId",
+                    type: "int"
+                },
+                {
                     name: "created_at",
                     type: "timestamp",
                     default: "CURRENT_TIMESTAMP"
@@ -63,7 +67,7 @@ export class CreateFinancialGoalsTable1782868570637 implements MigrationInterfac
             "financialGoals",
             new TableForeignKey({
                 name: "fk_financialGoals_users",
-                columnNames: ["users_id"],
+                columnNames: ["usersId"],
                 referencedTableName: "users",
                 referencedColumnNames: ["id"],
                 onDelete: "CASCADE"

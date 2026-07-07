@@ -118,3 +118,12 @@ npx typeorm migration:create src/migration/CreateSituationsTable
 ```
 npx typeorm migration:run -d dist/data-source.js
 ```
+*16 - instalar bibliotaca para validar formularios*
+```
+npm i yup
+```
+*17 - intalar dependencia para permitir requisições externas* 
+```
+npm i cors
+npm install --save-dev @types/cors (instalar dependencia para compilar o cors)
+```

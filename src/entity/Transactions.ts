@@ -20,11 +20,14 @@ export class Transaction {
     @Column({type: "varchar", length: 255})
     description!: string
 
-    @Column({type: Date})
+    @Column({type:"decimal", precision:10, scale: 2})
+    amount!: number
+
+    @Column({type: "date"})
     transation_date!: Date
 
-    @Column({type: "varchar", length: 255})
-    observations!: string
+    @Column({type: "varchar", length: 255, nullable:true})
+    observations?: string
 
 
     // relacionamento ManyToOne com a tabela Users
