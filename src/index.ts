@@ -16,11 +16,13 @@ app.use(express.json())
 import usersController from "./controllers/usersController"
 import transactionsController from "./controllers/transactionsController"
 import categoriesController from "./controllers/categoriesController"
+import financialGoalsController from "./controllers/financialGoalsController"
 
 //criar rotas
 app.use('/', usersController)
 app.use('/', transactionsController)
 app.use('/', categoriesController)
+app.use('/', financialGoalsController)
 
 //criar rota get principal
 app.get("/", (req: Request, res: Response) => {
