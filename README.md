@@ -127,7 +127,3 @@ npm i yup
 npm i cors
 npm install --save-dev @types/cors (instalar dependencia para compilar o cors)
 ```
-realização do exame 
-5 dias uteis pra retorno da operadora 
-37928020260713529545
-jessica 
