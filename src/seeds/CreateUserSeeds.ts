@@ -59,8 +59,8 @@ export default class CreateUserSeed{
                 password: "12345678"
             },
             {
-                name: "luana",
-                email: "luana@email.com",
+                name: "jacson",
+                email: "jacson@email.com",
                 password: "12345678"
             }
         ]

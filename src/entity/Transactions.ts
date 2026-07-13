@@ -4,7 +4,7 @@ import { User } from "./Users"
 //importa a entidade category para ser usada no relacionamento 
 import { Category } from "./Categories"
 
-export enum UserType{
+export enum transactionType{
     INCOME = "income",
     EXPENSE = "expense"
 }
@@ -14,8 +14,8 @@ export class Transaction {
     @PrimaryGeneratedColumn()
     id!: number
 
-    @Column({type: "enum", enum: UserType})
-    type!: UserType
+    @Column({type: "enum", enum: transactionType})
+    type!: transactionType
 
     @Column({type: "varchar", length: 255})
     description!: string
