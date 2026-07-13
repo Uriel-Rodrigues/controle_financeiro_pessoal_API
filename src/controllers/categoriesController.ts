@@ -8,6 +8,8 @@ import { Category } from "../entity/Categories";
 import * as yup from "yup"
 //importa biblioteca not do typeorm para buscar no banco 
 import { Not } from "typeorm";
+//importar serviço de paginação 
+import { PaginationService } from "../Services/PaginationService";
 
 //criar aplicação express
 const router = express.Router()
@@ -17,10 +19,16 @@ router.get("/categories/list", async (req: Request, res:Response) =>{
     try {
         //obater o repositorio da entidade
         const categoriesRpository = await AppDataSource.getRepository(Category)
-        //recuperar todos os registros
-        const categories = await categoriesRpository.find()
-        //retornar os registros para o usuario
-        res.status(200).json(categories)
+        
+        //receber o numero da pagina e definir 1 como padrão
+        const page = Number (req.query.page) || 1
+        // definir o numero de requistros por pagina
+        const limit = Number (req.query.limit) || 3
+        //user o serviço de paginação
+        const result = await PaginationService.paginate(categoriesRpository,page,limit, {id: "DESC"})
+        //retornar os registros para o usuario COM PAGINAÇÃO
+        res.status(200).json(result)
+        
     } catch (error) {
         //retornar menssagem em caso de erro
         res.status(500).json({

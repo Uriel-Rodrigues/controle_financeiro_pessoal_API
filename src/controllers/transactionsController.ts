@@ -8,8 +8,8 @@ import { Transaction } from "../entity/Transactions";
 import * as yup from "yup"
 //importa biblioteca not do typeorm para buscar no banco 
 import { Not } from "typeorm";
-import { transferableAbortController } from "node:util";
-
+//importar serviço de paginação
+import { PaginationService } from "../Services/PaginationService";
 
 //criar aplicação express
 const router = express.Router()
@@ -19,10 +19,15 @@ router.get("/transaction/list", async (req: Request, res: Response) => {
     try {
         //criar o repositorio da entidade
         const transactionsRepository = await AppDataSource.getRepository(Transaction)
-        //recuperar os dados
-        const transactions = await transactionsRepository.find()
-        //retornar os registros cadastrados
-        res.status(200).json(transactions)
+        //receber o numero da pagina e definir 1 como padrão
+        const page = Number (req.query.page) || 1
+        // definir o numero de requistros por pagina
+        const limit = Number (req.query.limit) || 3
+        //user o serviço de paginação
+        const result = await PaginationService.paginate(transactionsRepository,page,limit, {id: "DESC"})
+        //retornar os registros para o usuario COM PAGINAÇÃO
+        res.status(200).json(result)
+        
     } catch (error) {
         res.status(500).json({
             message: `error ao listar as transações: ${error}`

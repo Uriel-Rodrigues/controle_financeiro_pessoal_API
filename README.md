@@ -127,3 +127,23 @@ npm i yup
 npm i cors
 npm install --save-dev @types/cors (instalar dependencia para compilar o cors)
 ```
+*18 Converter o slug automaticamente antes de salvar no banco de dados.*
+```
+npm install slugify
+```
+*19 instalar o modulo para criptografar senha*
+```
+npm install --save bcryptjs
+```
+*20 instalar os tipos de bcryptjs*
+```
+npm install --save-dev @types/bcryptjs
+``` 
+*21 instalar a dependencia JWT para manipular token de autenticação*
+```
+npm install jsonwebtoken
+```
+*22 istalar os tipos do jsonwebtoken*
+```
+npm i --save-dev @types/jsonwebtoken
+```

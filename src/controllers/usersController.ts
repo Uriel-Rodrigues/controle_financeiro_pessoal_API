@@ -8,6 +8,8 @@ import { User } from "../entity/Users";
 import * as yup from "yup"
 //importa biblioteca not do typeorm para buscar no banco 
 import { Not } from "typeorm";
+//importaer serviço de paginação
+import { PaginationService } from "../Services/PaginationService";
 
 //criar aplicação express
 const router = express.Router()
@@ -18,11 +20,14 @@ router.get("/users/list", async (req:Request, res: Response)=> {
         //pegar o repositorio da entidade
         const userRepository = await AppDataSource.getRepository(User)
 
-        //recuperar todos os usuarios no baco 
-        const users = await userRepository.find()
-
-        //restornar os dados obtidos
-        res.status(200).json(users)
+        //receber o numero da pagina e definir 1 como padrão
+        const page = Number (req.query.page) || 1
+        // definir o numero de requistros por pagina
+        const limit = Number (req.query.limit) || 3
+        //user o serviço de paginação
+        const result = await PaginationService.paginate(userRepository,page,limit, {id: "DESC"})
+        //retornar os registros para o usuario COM PAGINAÇÃO
+        res.status(200).json(result)
         
     } catch (error) {
         res.status(500).json({

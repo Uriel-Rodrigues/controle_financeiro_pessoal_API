@@ -8,6 +8,8 @@ import { FinancialGoals } from "../entity/FinancialGoals";
 import * as yup from "yup"
 //importa biblioteca not do typeorm para buscar no banco 
 import { Not } from "typeorm";
+//importar serviço de paginação
+import { PaginationService } from "../Services/PaginationService";
 
 //criar aplicação express
 const router = express.Router()
@@ -17,10 +19,16 @@ router.get("/financialGoals/list", async (req:Request, res:Response) =>{
     try {
         //criar repositorio da entidade
         const financialGoalsRepository = await AppDataSource.getRepository(FinancialGoals)
-        //recuperar os registros na entidade
-        const financialGoals = await financialGoalsRepository.find()
-        //retornar registros 
-        res.status(200).json(financialGoals)
+
+        //receber o numero da pagina e definir 1 como padrão
+        const page = Number (req.query.page) || 1
+        // definir o numero de requistros por pagina
+        const limit = Number (req.query.limit) || 3
+        //user o serviço de paginação
+        const result = await PaginationService.paginate(financialGoalsRepository,page,limit, {id: "DESC"})
+        //retornar os registros para o usuario COM PAGINAÇÃO
+        res.status(200).json(result)
+        
     } catch (error) {
         //retornar mensagem de erro 
         res.status(500).json({
