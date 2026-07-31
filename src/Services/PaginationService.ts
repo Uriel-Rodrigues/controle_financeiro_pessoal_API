@@ -1,4 +1,3 @@
-import { error } from 'node:console'
 import {Repository, ObjectLiteral, FindOptionsOrder} from 'typeorm'
 
 //criar uma interface

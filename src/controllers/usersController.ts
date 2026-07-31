@@ -10,6 +10,8 @@ import * as yup from "yup"
 import { Not } from "typeorm";
 //importaer serviço de paginação
 import { PaginationService } from "../Services/PaginationService";
+//importar biblioteca para criptografar senha 
+import bcrypt from "bcryptjs"
 
 //criar aplicação express
 const router = express.Router()
@@ -19,7 +21,6 @@ router.get("/users/list", async (req:Request, res: Response)=> {
     try {
         //pegar o repositorio da entidade
         const userRepository = await AppDataSource.getRepository(User)
-
         //receber o numero da pagina e definir 1 como padrão
         const page = Number (req.query.page) || 1
         // definir o numero de requistros por pagina
@@ -89,7 +90,10 @@ router.post("/users/create", async (req:Request, res:Response) =>{
                 message: "email de usuario ja cadastrado, tente outro"
             })
 
-        } 
+        }
+        
+        //criptografar senha antes de salvar
+        data.password = await bcrypt.hash(data.password, 10)
 
         //cria um novo registro 
         const newUser = userRepository.create(data)
@@ -128,7 +132,6 @@ router.put("/users/:id", async (req: Request, res: Response) => {
         const schema = yup.object().shape({
             name: yup.string().required("o campo nome é obrigatorio!").min(3, "o campo nome deve ter no minimo 3 caracteres!"),
             email: yup.string().required("o campo email é obbrigatorio!").email(),
-            password: yup.string().required("o campo senha é obrigatorio!").min(8,"a senha precisa conter no minimo 8 caracteres!")
         })
         //verificar se dados passaram na validação
         await schema.validate(data,{abortEarly:false})
@@ -208,10 +211,62 @@ router.delete("/users/:id", async (req:Request, res:Response) => {
     } catch (error) {
         //encaminha menssagem de erro ao deletar
         res.status(500).json({
-            message: `erro ao deletar o usuario tenta: ${error}`
+            message: `erro ao deletar o usuario : ${error}`
         })
     }
 })
+
+//criar rota somente para EDITAR A SENHA VERBO PUT
+router.put("/users/users-password/:id", async (req: Request, res:Response) =>{
+    try {
+        // pegar os dados que vem pela URL
+        const {id} = req.params
+        //pegar os dados do corpo
+        const data = req.body 
+        //fazer verificação com yup
+        const schema = yup.object().shape({
+            password: yup.string().required("o campo senha é obrigatorio").min(6, "o campo deve ter pelo menos 6 caracteres")
+        })
+        //verificar se passou pela verificação
+        await schema.validate(data, {abortEarly: false})
+        //obeter repositorio da entidade users
+        const userRepository = AppDataSource.getRepository(User)
+        //verificar se algum usuario existe com o id captado da URL
+        const user = await userRepository.findOneBy({id:parseInt(id as string)})
+
+        if(!user) {
+            res.status(404).json({
+                message: "usuario não encontrado!"
+            })
+            return
+        }
+
+        // //criptografar a senha
+        data.password = await bcrypt.hash(data.password, 10)
+        
+        //realizar a alteração do registro
+        userRepository.merge(user, data)
+        // salvar a alteração
+        const updatPassword = await userRepository.save(user)
+        //retornar mensagem de sucesso 
+        res.status(200).json({
+            message: "senha atualizada com sucesso!",
+            user: updatPassword
+        })
+        
+    } catch (error:any) {
+        //verifica se teve erro na validação 
+        if(error instanceof yup.ValidationError){
+            res.status(400).json({
+                message:error.errors
+            })
+        }
+        //retorna mensagem de erro
+        res.status(500).json({
+            message: "não foi possivel atualizar a senha do usuario, tente novamente"
+        })
+    }
+} )
 
 //exportar
 export default router

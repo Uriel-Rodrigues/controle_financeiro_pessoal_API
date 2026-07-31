@@ -75,7 +75,7 @@ router.post("/financialGoals/create", async (req: Request, res:Response) => {
             description: yup.string().required("campo descrição é obrigatorio!").min(3, "a descrição deve ter minimo de 3 caracteres"),  
             target_amount: yup.number().required("campo valor alvo é obrigatorio!").typeError("o campo deve ser um numero!"), 
             current_amount: yup.number().required("campo valor atual é obrigatorio!").typeError("o campo deve ser um numero!"),
-            target_date: yup.date().required("campo para data da meta é obriogatorio! YYYY-MM-DD").min(new Date(), "a data da meta nao pode ser uma data passada"),
+            target_date: yup.string().required("campo para data da meta é obriogatorio!"),
             status: yup.string().required("status do objetivo fincanceiro é obrigatorio! active ou completed")
         })
         //verificar se os dados passaram na validação

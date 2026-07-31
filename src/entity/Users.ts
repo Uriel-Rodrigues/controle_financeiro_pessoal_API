@@ -3,8 +3,10 @@ import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToMany
 import { Transaction } from "./Transactions"
 //importa a entidade Category
 import { Category } from "./Categories"
-
+//importa entidade financialGoals
 import { FinancialGoals } from "./FinancialGoals"
+//importa biblioteca para criptografar senha
+import bcrypt from "bcryptjs"
 
 @Entity("users")
 export class User {
@@ -45,5 +47,11 @@ export class User {
 
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate:"CURRENT_TIMESTAMP"})
     updated_at!: Date;
+
+    //metodo para comparar a senha informada pelo usuario com a senha armazenada no banco de dados 
+    async comparePassword(password:string):Promise<boolean> {
+        //comparar a senha enviada pela requisição com a senha criptografada no banco 
+        return bcrypt.compare(password, this.password)
+    }
 
 }

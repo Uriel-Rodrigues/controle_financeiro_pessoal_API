@@ -2,27 +2,35 @@
 import express, {Request, Response} from "express"
 //importar variaveis de embiente
 import dotenv from "dotenv"
-
 //carregar as variaveis do arquivo
 dotenv.config()
+//imortar biblioteca para permitir requisições externas 
+import cors from 'cors'
+
+
 
 //criar aplicação Express
 const app = express()
 
 //criar o middleware para receber os dados no corpo da requisição
 app.use(express.json())
+// criar middleware para permitir requisições externas
+app.use(cors())
 
 // importas as controllers
 import usersController from "./controllers/usersController"
 import transactionsController from "./controllers/transactionsController"
 import categoriesController from "./controllers/categoriesController"
 import financialGoalsController from "./controllers/financialGoalsController"
-
+import TestConnectionController from "./controllers/TestConnectionController"
+import authController from "./controllers/authController"
 //criar rotas
 app.use('/', usersController)
 app.use('/', transactionsController)
 app.use('/', categoriesController)
 app.use('/', financialGoalsController)
+app.use('/', TestConnectionController)
+app.use('/', authController)
 
 //criar rota get principal
 app.get("/", (req: Request, res: Response) => {
