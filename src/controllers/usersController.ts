@@ -12,12 +12,14 @@ import { Not } from "typeorm";
 import { PaginationService } from "../Services/PaginationService";
 //importar biblioteca para criptografar senha 
 import bcrypt from "bcryptjs"
+//importar middleware de autenticação
+import { verifyToken, AuthRequest } from "../middleware/authMiddleware";
 
 //criar aplicação express
 const router = express.Router()
 
 //criar rota para LISTAR todos os registros (verbo GET)
-router.get("/users/list", async (req:Request, res: Response)=> {
+router.get("/users/list", verifyToken, async (req:Request, res: Response)=> {
     try {
         //pegar o repositorio da entidade
         const userRepository = await AppDataSource.getRepository(User)
@@ -39,21 +41,22 @@ router.get("/users/list", async (req:Request, res: Response)=> {
 })
 
 //criar rota para LISTAR somente um REGISTRO ESPECIFICO (verbo GET)
-router.get("/users/:id",  async (req:Request, res:Response) => {
+router.get("/users/me", verifyToken,  async (req:AuthRequest, res:Response) => {
     try {
-        //pegar o id encaminhado pela URL
-        const {id} = req.params
+        //pegar o id de usuario encaminhado pelo token
+        const userId = req.user!.id
         //pegar o repositorio da entidade users
         const userRepository = AppDataSource.getRepository(User)
         //verificar se existe um usuario com o mesmo id
         const user = await userRepository.findOne({
-            where: {id: parseInt(id as string)}
+            where: {id: userId}
         })
         //verificar se o usuario existe
         if(!user){
             return res.status(404).json({
                 message:"Usuario não encontrado!"
             })
+            return
         }
         //retornar o usuario caso encontrado
         res.status(200).json(user)
@@ -91,9 +94,10 @@ router.post("/users/create", async (req:Request, res:Response) =>{
             })
 
         }
-        
+
+        //metodo de criptografia implementado dentro da entidade
         //criptografar senha antes de salvar
-        data.password = await bcrypt.hash(data.password, 10)
+        //data.password = await bcrypt.hash(data.password, 10)
 
         //cria um novo registro 
         const newUser = userRepository.create(data)
@@ -122,10 +126,10 @@ router.post("/users/create", async (req:Request, res:Response) =>{
 })
 
 //criar rota para EDITAR um registro ja existente (verbo PUT)
-router.put("/users/:id", async (req: Request, res: Response) => {
+router.put("/users/edit", verifyToken, async (req: AuthRequest, res: Response) => {
     try {
         //pegar parametro da url que indica o registro
-        const {id} = req.params
+        const userId = req.user!.id
         //pegar os dados do registro
         const data = req.body
         //validar dados encaminhados com yup
@@ -139,7 +143,7 @@ router.put("/users/:id", async (req: Request, res: Response) => {
         const userRepository = await AppDataSource.getRepository(User)
         //buscar registro especificado
         const user = await userRepository.findOne({
-            where: {id: parseInt(id as string)}
+            where: {id: userId}
         })
         //verificar se foi encontrado
         if (!user){
@@ -148,14 +152,14 @@ router.put("/users/:id", async (req: Request, res: Response) => {
             })
         }  
         //verificar se existe alguem com o mesmo email excluindo o proprio registro
+        
         const existUserEmail = await userRepository.findOne({
             where: 
             {
                 email: data.email,
-                id: Not(parseInt(id as string))
+                id: Not(userId)
             }
         }) 
-
         //encerrar edição caso ja exista usuario com mesmo email
         if(existUserEmail) {
             return res.status(409).json({
@@ -185,15 +189,15 @@ router.put("/users/:id", async (req: Request, res: Response) => {
 })
 
 //criar rota para DELETAR registro (verbo DELETE)
-router.delete("/users/:id", async (req:Request, res:Response) => {
+router.delete("/users/delete",verifyToken, async (req:AuthRequest, res:Response) => {
     try {
         //pegar id do usuario pela url
-        const {id} = req.params
+        const userId = req.user!.id
         //pegar repositorio da  entidade user
         const userRepository = await AppDataSource.getRepository(User)
         //verificar se o usuario existe
         const existUser = await userRepository.findOne({
-            where: {id: parseInt(id as string)}
+            where: {id: userId}
         })
         
         if(!existUser){
@@ -241,8 +245,9 @@ router.put("/users/users-password/:id", async (req: Request, res:Response) =>{
             return
         }
 
-        // //criptografar a senha
-        data.password = await bcrypt.hash(data.password, 10)
+        //metodo de criptografia implementado dentro da entidade
+        //criptografar a senha
+        //data.password = await bcrypt.hash(data.password, 10)
         
         //realizar a alteração do registro
         userRepository.merge(user, data)
@@ -267,6 +272,72 @@ router.put("/users/users-password/:id", async (req: Request, res:Response) =>{
         })
     }
 } )
+
+//criar rota para RESETAR a senha 
+//dados em forma de objeto 
+/*
+{
+    "password": "senha atual"
+    "newPassword": "nova senha"
+    "confirmNewPassword": "nova senha"
+} 
+*/
+router.put("/users/reset-password", verifyToken, async (req: AuthRequest, res: Response) => {
+    try {
+        //pegar id do usuario pela url
+        const userId = req.user!.id
+        //pegar os dados do corpo
+        const data = req.body 
+        //fazer verificação com yup
+        const schema = yup.object().shape({
+            atualPassword: yup.string().required("o campo senha é obrigatorio").min(6, "o campo deve ter pelo menos 6 caracteres"),
+            newPassword: yup.string().required("o campo nova senha é obrigatorio").min(6, "o campo deve ter pelo menos 6 caracteres"),
+            confirmPassword: yup.string().oneOf([yup.ref("newPassword")],"A confirmação da senha não corresponde à nova senha").required("necessario confirmar a senha").min(6, "o campo deve ter pelo menos 6 caracteres"),
+        })
+        //verificar se passou pela verificação
+        await schema.validate(data, {abortEarly: false})
+        //obeter repositorio da entidade users
+        const userRepository = AppDataSource.getRepository(User)
+        //verificar se algum usuario existe com o id captado pelo token
+        const user = await userRepository.findOneBy({id:userId})
+        //verificar se a senha encaminhada é igual a cadastrada no banco
+        const passwordMatch = await bcrypt.compare(data.atualPassword, user!.password)
+
+        //metodo de criptografia implementado dentro da entidade
+        //criptografar a senha
+        //data.password = await bcrypt.hash(data.password, 10)
+
+        //verificar se a senha no banco é igual a senha encaminhada
+        if(!passwordMatch) {
+            res.status(400).json({
+                message: "A senha atual digitada está incorreta"
+            })
+            return
+        }
+
+        //colocar a nova senha do usuario 
+        user!.password = data.newPassword
+        // salvar a alteração
+        const updatPassword = await userRepository.save(user!)
+        //retornar mensagem de sucesso 
+        res.status(200).json({
+            message: "senha atualizada com sucesso!",
+            user: updatPassword
+        })
+        
+    } catch (error:any) {
+        //verifica se teve erro na validação 
+        if(error instanceof yup.ValidationError){
+            res.status(400).json({
+                message:error.errors
+            })
+        }
+        //retorna mensagem de erro
+        res.status(500).json({
+            message: `não foi possivel atualizar a senha do usuario, tente novamente ${error}`
+        })
+    }
+})
 
 //exportar
 export default router

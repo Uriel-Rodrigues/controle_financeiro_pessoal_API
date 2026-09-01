@@ -10,22 +10,27 @@ import * as yup from "yup"
 import { Not } from "typeorm";
 //importar serviço de paginação
 import { PaginationService } from "../Services/PaginationService";
+//importar middleware de autenticação
+import { verifyToken, AuthRequest } from "../middleware/authMiddleware"; 
 
 //criar aplicação express
 const router = express.Router()
 
 //criar rota para LISTAR todos os registros (verbo GET)
-router.get("/financialGoals/list", async (req:Request, res:Response) =>{
+router.get("/financialGoals/list",verifyToken, async (req: AuthRequest, res:Response) =>{
     try {
+        //pegar o id de usuario encaminhado pelo token
+        const userId = req.user!.id
+
         //criar repositorio da entidade
         const financialGoalsRepository = await AppDataSource.getRepository(FinancialGoals)
-
         //receber o numero da pagina e definir 1 como padrão
         const page = Number (req.query.page) || 1
         // definir o numero de requistros por pagina
         const limit = Number (req.query.limit) || 3
         //user o serviço de paginação
-        const result = await PaginationService.paginate(financialGoalsRepository,page,limit, {id: "DESC"})
+        const result = await PaginationService.paginate(financialGoalsRepository,page,limit, {id: "DESC"}, undefined, {users: {id: userId}})
+       
         //retornar os registros para o usuario COM PAGINAÇÃO
         res.status(200).json(result)
         
@@ -65,10 +70,12 @@ router.get("/financialGoals/:id", async (req: Request, res: Response) => {
 })
 
 //criar rota para CRIAR novo registro de ategoria (verbo POST)
-router.post("/financialGoals/create", async (req: Request, res:Response) => {
+router.post("/financialGoals/create",verifyToken, async (req: AuthRequest, res:Response) => {
     try {
         //pegar os dados que vem pela requisição
         const data = req.body
+         //pegar o id do usuario pelo token 
+        const userId = req.user!.id
         //validar dados com yup
         const schema = yup.object().shape({
             title: yup.string().required("campo titulo é obrigatorio!"),
@@ -91,7 +98,7 @@ router.post("/financialGoals/create", async (req: Request, res:Response) => {
             target_date: data.target_date,
             status: data.status.toLowerCase(),
             users: {
-                id: data.usersId
+                id: userId
             }
         })
         //salvar registro 
@@ -114,7 +121,7 @@ router.post("/financialGoals/create", async (req: Request, res:Response) => {
 })
 
 //criar rota para EDITAR um registro ja existente (verbo PUT)
-router.put("/financialGoals/:id", async (req: Request, res: Response) => {
+router.put("/financialGoals/:id",verifyToken, async (req: Request, res: Response) => {
     try {
         //pegar dados que vem pela URL
         const {id} = req.params
@@ -165,14 +172,23 @@ router.put("/financialGoals/:id", async (req: Request, res: Response) => {
 })
 
 //criar rota para DELETAR registro (verbo DELETE)
-router.delete("/financialGoals/:id", async (req: Request, res: Response) => {
+router.delete("/financialGoals/delete/:id",verifyToken, async (req: AuthRequest, res: Response) => {
     try {
         //pegar dados que vem pela URL
         const {id} = req.params
+        //pegar id do usuario pelo token
+        const userId = req.user!.id
+        //converter para numero 
+        const financialId = Number(id)
         //criar repositorio da entidade
         const financialGoalsRepository = await AppDataSource.getRepository(FinancialGoals)
         //verificar se o registro existe
-        const financialGoals = await financialGoalsRepository.findOneBy({id: parseInt(id as string)})
+        const financialGoals = await financialGoalsRepository.findOne({
+            where: {
+                id: financialId,
+                users: {id: userId}
+            }
+        })
         //retornar mensagem caso nao exista e parar processamento 
         if(!financialGoals){
             return res.status(404).json({

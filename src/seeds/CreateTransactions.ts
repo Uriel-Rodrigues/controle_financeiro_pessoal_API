@@ -6,6 +6,8 @@ import { Category } from "../entity/Categories";
 import { Transaction } from "../entity/Transactions";
 //importar o enum de da entidade transactions
 import { transactionType } from "../entity/Transactions";
+// importar biblioteca para manibulação de data
+import { subMonths } from "date-fns";
 
 export default class CreateTransactionSeed {
     public async run(dataSource: DataSource): Promise <void> {
@@ -44,7 +46,8 @@ export default class CreateTransactionSeed {
                 amount: 5000,
                 transation_date: "2026-08-26",
                 users: user,
-                categories: categories
+                categories: categories,
+                created_at: subMonths(new Date(), 12)
             },
             {
                 type: transactionType.EXPENSE,  
@@ -52,7 +55,8 @@ export default class CreateTransactionSeed {
                 amount: 20,
                 transation_date: "2026-08-24",
                 users: user,
-                categories: categories
+                categories: categories,
+                created_at: subMonths(new Date(), 14) 
             },
             {
                 type: transactionType.INCOME,  
@@ -60,7 +64,8 @@ export default class CreateTransactionSeed {
                 amount: 52,
                 transation_date: "2026-08-26",
                 users: user,
-                categories: categories
+                categories: categories,
+                created_at: subMonths(new Date(), 20)
             },
             {
                 type: transactionType.EXPENSE,  
@@ -68,7 +73,8 @@ export default class CreateTransactionSeed {
                 amount: 200,
                 transation_date: "2026-08-26",
                 users: user,
-                categories: categories
+                categories: categories,
+                created_at: subMonths(new Date(), 50)
             },
             {
                 type: transactionType.EXPENSE,  
@@ -76,7 +82,8 @@ export default class CreateTransactionSeed {
                 amount: 200,
                 transation_date: "2026-08-26",
                 users: user,
-                categories: categories
+                categories: categories,
+                created_at: subMonths(new Date(), 10)
             },
             {
                 type: transactionType.EXPENSE,  
@@ -84,7 +91,8 @@ export default class CreateTransactionSeed {
                 amount: 1000,
                 transation_date: "2026-08-26",
                 users: user,
-                categories: categories
+                categories: categories,
+                created_at: subMonths(new Date(), 60)
             }
         ]
         //salvar registros

@@ -24,6 +24,7 @@ import categoriesController from "./controllers/categoriesController"
 import financialGoalsController from "./controllers/financialGoalsController"
 import TestConnectionController from "./controllers/TestConnectionController"
 import authController from "./controllers/authController"
+import reportsController from "./controllers/reportsController"
 //criar rotas
 app.use('/', usersController)
 app.use('/', transactionsController)
@@ -31,6 +32,7 @@ app.use('/', categoriesController)
 app.use('/', financialGoalsController)
 app.use('/', TestConnectionController)
 app.use('/', authController)
+app.use('/', reportsController)
 
 //criar rota get principal
 app.get("/", (req: Request, res: Response) => {

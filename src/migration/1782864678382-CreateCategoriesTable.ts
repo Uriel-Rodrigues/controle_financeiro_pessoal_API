@@ -17,7 +17,6 @@ export class CreateCategoriesTable1782864678382 implements MigrationInterface {
                 {
                     name: "name",
                     type: "varchar",
-                    isUnique: true
                 },
                 {
                     name: "type",

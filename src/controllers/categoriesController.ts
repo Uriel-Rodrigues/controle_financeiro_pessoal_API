@@ -10,22 +10,24 @@ import * as yup from "yup"
 import { Not } from "typeorm";
 //importar serviço de paginação 
 import { PaginationService } from "../Services/PaginationService";
+import { verifyToken, AuthRequest } from "../middleware/authMiddleware";
 
 //criar aplicação express
 const router = express.Router()
 
 //criar rota para LISTAR todos os registros (verbo GET)
-router.get("/categories/list", async (req: Request, res:Response) =>{
+router.get("/categories/list", verifyToken, async (req: AuthRequest, res:Response) =>{
     try {
+        //obter id do usuario encaminhad atraves do token
+        const userId = req.user!.id
         //obater o repositorio da entidade
         const categoriesRpository = await AppDataSource.getRepository(Category)
-        
         //receber o numero da pagina e definir 1 como padrão
         const page = Number (req.query.page) || 1
         // definir o numero de requistros por pagina
         const limit = Number (req.query.limit) || 3
         //user o serviço de paginação
-        const result = await PaginationService.paginate(categoriesRpository,page,limit, {id: "DESC"})
+        const result = await PaginationService.paginate(categoriesRpository,page,limit, {id: "DESC"},undefined, {users: {id: userId}})
         //retornar os registros para o usuario COM PAGINAÇÃO
         res.status(200).json(result)
         
@@ -67,10 +69,12 @@ router.get("/categories/:id", async (req:Request, res:Response) => {
 })
 
 //criar rota para CRIAR novo registro de ategoria (verbo POST)
-router.post("/categories/create", async (req: Request, res:Response) =>{
+router.post("/categories/create",verifyToken, async (req: AuthRequest, res:Response) =>{
     try {
         //pegar os dados que vem pela requisição
         const data = req.body
+        //pegar o id do usuario que vem pelo token
+        const userId = req.user!.id
         //validade campos com yup
         const schema = yup.object().shape({
             name: yup.string().required("o nome da categoria é obrigatorio").min(3, "o  nome deve ter elo menos 3 caracteres"),
@@ -80,20 +84,12 @@ router.post("/categories/create", async (req: Request, res:Response) =>{
         await schema.validate(data,{abortEarly:false}) 
         //criar o repositorio da entiade
         const categoriesRpository = await AppDataSource.getRepository(Category)
-        //verificar se ja existe algum registro com o mesmo nome
-        const category = await categoriesRpository.findOne({
-            where: { name: data.name.toLowerCase()}
-        }) 
-        if(category){
-            res.status(409).json({
-                message: "nome de categoria ja cadastrada!"
-            })
-        }
+        
         //criar novo registro
         const newCategory = await categoriesRpository.create({
             name: data.name.toLowerCase(),
             type: data.type,
-            users: {id: data.usersId}
+            users: {id: userId}
         })
         //salver novo registro
         await categoriesRpository.save(newCategory)
@@ -114,7 +110,7 @@ router.post("/categories/create", async (req: Request, res:Response) =>{
 })
 
 //criar rota para EDITAR um registro ja existente (verbo PUT)
-router.put("/categories/:id", async (req:Request, res:Response) => {
+router.put("/categories/:id",verifyToken, async (req:Request, res:Response) => {
     try {
         //pegar os registro indicado pela URL 
         const {id} = req.params
@@ -174,14 +170,23 @@ router.put("/categories/:id", async (req:Request, res:Response) => {
 })
 
 //criar rota para DELETAR um registro (verbo DELETE)
-router.delete("/categories/:id", async (req: Request, res: Response) => {
+router.delete("/categories/delete/:id",verifyToken, async (req: AuthRequest, res: Response) => {
     try {
         //pegar os dados encaminhadospela URL 
         const {id} = req.params
+        //pegar o id do usuario encaminhado pelo token 
+        const userId = req.user!.id
+        //converter id para numero 
+        const categoriesId = Number(id)
         //criar o repositorio da entidade
         const categoriesRpository = await AppDataSource.getRepository(Category)
         //verificar se o registro existe
-        const category = await categoriesRpository.findOneBy({id: parseInt(id as string)})
+        //procura o id da categoria no usuario logado 
+        const category = await categoriesRpository.findOne({
+            where: {
+                id: categoriesId, 
+                users: {id: userId}}
+        })
         //retornar mensagem caso categoria nao exista 
         if(!category){
             return res.status(404).json({

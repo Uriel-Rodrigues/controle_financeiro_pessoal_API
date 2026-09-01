@@ -9,7 +9,7 @@ import dotenv from "dotenv"
 //carregar as variaveis do arquivo
 dotenv.config()
 
-//classe responsavel pela autrenticação do usuario 
+//classe responsavel pela autenticação do usuario 
 export class AuthService {
 
     //criar um repositorio para manipular a tabela user

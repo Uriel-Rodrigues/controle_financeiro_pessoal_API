@@ -7,16 +7,21 @@ import { Transaction } from "../entity/Transactions";
 //importar sistema de validadção de dados yup
 import * as yup from "yup"
 //importa biblioteca not do typeorm para buscar no banco 
-import { Not } from "typeorm";
+import { FindOptionsWhere } from "typeorm";
 //importar serviço de paginação
 import { PaginationService } from "../Services/PaginationService";
+//importar middleware de autenticação
+import { verifyToken, AuthRequest } from "../middleware/authMiddleware";
+
 
 //criar aplicação express
 const router = express.Router()
 
 //criar rota para LISTAR todos os registros (verbo GET)
-router.get("/transaction/list", async (req: Request, res: Response) => {
+router.get("/transaction/list", verifyToken, async (req: AuthRequest, res: Response) => {
     try {
+        //pegar o id de usuario encaminhado pelo token
+        const userId = req.user!.id
         //criar o repositorio da entidade
         const transactionsRepository = await AppDataSource.getRepository(Transaction)
         //receber o numero da pagina e definir 1 como padrão
@@ -24,7 +29,7 @@ router.get("/transaction/list", async (req: Request, res: Response) => {
         // definir o numero de requistros por pagina
         const limit = Number (req.query.limit) || 3
         //user o serviço de paginação
-        const result = await PaginationService.paginate(transactionsRepository,page,limit, {id: "DESC"})
+        const result = await PaginationService.paginate(transactionsRepository,page,limit, {id: "DESC"}, undefined, {users: {id: userId}})
         //retornar os registros para o usuario COM PAGINAÇÃO
         res.status(200).json(result)
         
@@ -35,11 +40,12 @@ router.get("/transaction/list", async (req: Request, res: Response) => {
     }
 })
 
-////criar rota para LISTAR somente um REGISTRO ESPECIFICO (verbo GET)
-router.get("/transaction/:id", async (req: Request, res: Response) => {
+//criar rota para LISTAR somente um REGISTRO ESPECIFICO (verbo GET)
+router.get("/transaction/:id",verifyToken, async (req: Request, res: Response) => {
     try {
         //pegar os dados que vem pela URL
         const {id} = req.params
+        //pegar o id do usuarios 
         //pegar os dados que vem pela requisição
         const data = req.body
         //criar o repositorio da entidade
@@ -63,10 +69,12 @@ router.get("/transaction/:id", async (req: Request, res: Response) => {
 })
 
 //riar rolta para CADASTRAR transações (verbo post)
-router.post('/transaction/create', async (req: Request, res: Response) => {
+router.post('/transaction/create',verifyToken, async (req: AuthRequest, res: Response) => {
     try {
         //pegar dados enviados pela requisição
         var data = req.body
+        //pegar o id do usuario pelo token 
+        const userId = req.user!.id
         //validar dados com yup
         const schema = yup.object().shape({
             type: yup.string().required("necessario informar o tipo da transação: income ou expense"),
@@ -86,7 +94,7 @@ router.post('/transaction/create', async (req: Request, res: Response) => {
             transation_date: data.transation_date,
             observations: data.observations,
             users: {
-                id: data.usersId
+                id: userId
             },
             categories: {
                 id: data.categoriesId
@@ -113,7 +121,7 @@ router.post('/transaction/create', async (req: Request, res: Response) => {
 })
 
 //criar rota para EDITAR um registro ja existente (verbo PUT)
-router.put("/transaction/:id", async (req: Request, res: Response) => {
+router.put("/transaction/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         //pegar os dados encaminhados pela URL
         const {id} = req.params
@@ -161,14 +169,21 @@ router.put("/transaction/:id", async (req: Request, res: Response) => {
 })
 
 //criar rota para DELETAR um registro (verbo DELETE)
-router.delete("/transaction/:id", async (req: Request, res:Response) => {
+router.delete("/transaction/delete/:id", verifyToken, async (req: AuthRequest, res:Response) => {
     try {
         //pegar os dados encaminhados pela URL
         const {id} = req.params
+        //pegar id do usuario pelo token
+        const userId = req.user!.id
+        //converter para numero 
+        const transactionId = Number(id)
         //criar repositorio da entidade
         const transactionRepository = await AppDataSource.getRepository(Transaction)
-        //verificar se o registro existe
-        const transaction = await transactionRepository.findOneBy({id: parseInt(id as string)})
+        //verifica se o registro existe
+        //procura o id da transação no usuario logado 
+        const transaction = await transactionRepository.findOne({
+            where: {id: transactionId, users: {id:userId}}
+        })
         //retornar mensagem caso nao exista 
         if(!transaction){
             return res.status(404).json({

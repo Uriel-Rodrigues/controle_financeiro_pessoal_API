@@ -147,3 +147,11 @@ npm install jsonwebtoken
 ```
 npm i --save-dev @types/jsonwebtoken
 ```
+*23 instalar a biblioteca nodemailer para enviar email*
+```
+npm install nodemailer
+```
+instaler os tipos do nodemailer
+```
+npm instal --save-dev @types/nodemailer
+```

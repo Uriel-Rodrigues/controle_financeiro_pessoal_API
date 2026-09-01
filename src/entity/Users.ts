@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, OneToMany} from "typeorm"
+import {Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, BeforeUpdate} from "typeorm"
 //importa a entidade Transactions
 import { Transaction } from "./Transactions"
 //importa a entidade Category
@@ -47,6 +47,16 @@ export class User {
 
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate:"CURRENT_TIMESTAMP"})
     updated_at!: Date;
+
+    //metodo para criptogravar a senha
+    @BeforeInsert() // executa o metodo antes de inserir um novo usuario 
+    @BeforeUpdate() //executa o metodo antes de atualizar dados de um usuario 
+    async hashPassword(): Promise <void> {
+        //verificar se a senha esta criptografada e a criptografa antes de salvar no banco 
+        if (this.password && !this.password.startsWith("$2b$")) {
+            this.password =  await bcrypt.hash(this.password, 10)
+        }
+    }
 
     //metodo para comparar a senha informada pelo usuario com a senha armazenada no banco de dados 
     async comparePassword(password:string):Promise<boolean> {

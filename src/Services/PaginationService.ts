@@ -1,4 +1,4 @@
-import {Repository, ObjectLiteral, FindOptionsOrder} from 'typeorm'
+import {Repository, ObjectLiteral, FindOptionsOrder, FindOptionsWhere} from 'typeorm'
 
 //criar uma interface
 interface PaginationResult<T> {
@@ -18,10 +18,16 @@ export class PaginationService {
         page: number = 1,
         limit: number = 3,
         order: FindOptionsOrder<T> = {},
-        relations?: string[]
+        relations?: string[],
+        where?: FindOptionsWhere<T> 
     ):Promise <PaginationResult <T>>{
-        //consta o total de registros no repositorio para determinar a quantidade total de paginas
-        const totalRecord = await repository.count()
+        //consta o total de registros no repositorio para determinar a quantidade total de paginas (conta todos os registros de todos os usuarios)
+        //const totalRecord = await repository.count()
+        //contar somente os registros que atende ao fuiltro 
+        const totalRecord = await repository.count({
+            where: where
+        })
+
         //calcular o numero da ultima pagina baseado no total de registros e no limite de registros por pagina
         const lastPage = Math.ceil(totalRecord/limit) 
         //verificar se a pagina solicitada e valida; se não for, lançar um erro
@@ -30,8 +36,10 @@ export class PaginationService {
         }
         //calcular o offcet (a partir de qual registro começa a busca)
         const offset = (page - 1) * limit
+
         //buscar os registros do repositorio  com base no limite, offset e ordem de classificação
         const data = await repository.find({
+            where: where,
             take: limit,
             skip: offset,
             order: order,

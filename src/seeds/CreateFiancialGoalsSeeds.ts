@@ -6,6 +6,8 @@ import { User } from "../entity/Users";
 import { FinancialGoals } from "../entity/FinancialGoals";
 // importar enum type de financialGoals
 import { FinancialGoalsStatus} from "../entity/FinancialGoals";
+// importar biblioteca para manibulação de data
+import { subMonths } from "date-fns";
 
 export default class CreateFinancialGoalsSeed {
     public async run(dataSource: DataSource): Promise <void> {
@@ -36,7 +38,8 @@ export default class CreateFinancialGoalsSeed {
                 current_amount: 20000,
                 target_date: "2027-02-20",
                 status: FinancialGoalsStatus.ACTIVE,
-                users: user
+                users: user,
+                created_at: subMonths(new Date(), 14)
             },
             {
                 title: "aplicar em ações",
@@ -45,7 +48,8 @@ export default class CreateFinancialGoalsSeed {
                 current_amount: 5000,
                 target_date: "2027-02-20",
                 status: FinancialGoalsStatus.COMPLETED,
-                users: user
+                users: user,
+                created_at: subMonths(new Date(), 42)
             },
             {
                 title: "renda extra ",
@@ -54,7 +58,8 @@ export default class CreateFinancialGoalsSeed {
                 current_amount: 0,
                 target_date: "2027-02-20",
                 status: FinancialGoalsStatus.ACTIVE,
-                users: user
+                users: user,
+                created_at: subMonths(new Date(), 14)
             },
             {
                 title: "redusir gastos",
@@ -63,7 +68,8 @@ export default class CreateFinancialGoalsSeed {
                 current_amount: 200,
                 target_date: "2027-02-20",
                 status: FinancialGoalsStatus.ACTIVE,
-                users: user
+                users: user,
+                created_at: subMonths(new Date(), 15)
             },
             {
                 title: "imoveis",
@@ -72,7 +78,8 @@ export default class CreateFinancialGoalsSeed {
                 current_amount: 3000,
                 target_date: "2027-02-20",
                 status: FinancialGoalsStatus.COMPLETED,
-                users: user
+                users: user,
+                created_at: subMonths(new Date(), 10)
             },
             {
                 title: "20000 variados investidos",
@@ -81,7 +88,8 @@ export default class CreateFinancialGoalsSeed {
                 current_amount: 5000,
                 target_date: "2027-02-20",
                 status: FinancialGoalsStatus.ACTIVE,
-                users: user
+                users: user,
+                created_at: subMonths(new Date(), 20)
             }
         ]
         //salvar registros
